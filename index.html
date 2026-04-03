@@ -15,7 +15,7 @@
 <body>
 
 <div id="landing">
-  <h2>Prática de Inglês Situacional para Profissões</h2>
+  <h2>Prática de Inglês para Profissões</h2>
   <p>
     Treine inglês com foco no seu trabalho. Escolha sua área, pratique situações reais
     e agende uma conversa ao vivo com um instrutor que entende o seu contexto.
@@ -24,19 +24,10 @@
   <div class="box">
     <strong>Como funciona:</strong>
     <ul>
-      <li>Escolha sua área (Engenharia, Aviação, Dados & Tecnologia)</li>
-      <li>Selecione uma situação real de trabalho</li>
-      <li>Veja palavras-chave com pronúncia em PT-BR</li>
-      <li>Agende uma conversa prática</li>
-    </ul>
-  </div>
-
-  <div class="box">
-    <strong>Diferencial:</strong>
-    <ul>
-      <li>Foco em situações reais (não é curso genérico)</li>
-      <li>Vocabulário técnico do seu dia a dia</li>
-      <li>Pronúncia adaptada para brasileiros</li>
+      <li>Escolha sua área</li>
+      <li>Selecione uma situação</li>
+      <li>Veja palavras-chave</li>
+      <li>Agende uma conversa</li>
     </ul>
   </div>
 
@@ -56,97 +47,100 @@
 
 <div id="app" class="hidden">
 
-  <h2>Conversa Profissional em Inglês</h2>
+<h2>Conversa Profissional em Inglês</h2>
 
-  <div class="box">
-    <label>Profissão</label>
-    <select id="profession" onchange="loadScenarios()">
-      <option value="">--Escolha--</option>
-      <option value="eng">Engenharia</option>
-      <option value="avi">Aviação</option>
-      <option value="data">Dados & Tecnologia</option>
-    </select>
-  </div>
+<div class="box">
+<label>Profissão</label>
+<select id="profession" onchange="loadScenarios()">
+<option value="">--Escolha--</option>
+<option value="eng">Engenharia</option>
+<option value="avi">Aviação</option>
+<option value="data">Dados & Tecnologia</option>
+</select>
+</div>
 
-  <div class="box">
-    <label>Nível</label>
-    <button onclick="setLevel('Iniciante')">Iniciante</button>
-    <button onclick="setLevel('Intermediário')">Intermediário</button>
-    <button onclick="setLevel('Avançado')">Avançado</button>
-    <p id="level"></p>
-  </div>
+<div class="box">
+<label>Nível</label>
+<button onclick="setLevel('Iniciante')">Iniciante</button>
+<button onclick="setLevel('Intermediário')">Intermediário</button>
+<button onclick="setLevel('Avançado')">Avançado</button>
+<p id="level"></p>
+</div>
 
-  <div class="box">
-    <label>Situação</label>
-    <select id="scenario"></select>
-    <button onclick="loadScenario()">Carregar</button>
-    <p id="context"></p>
-  </div>
+<div class="box">
+<label>Situação</label>
+<select id="scenario"></select>
+<button onclick="loadScenario()">Carregar</button>
+<p id="context"></p>
+</div>
 
-  <div class="box">
-    <h3>Palavras-chave</h3>
-    <ul id="keywords"></ul>
-  </div>
+<div class="box">
+<h3>Palavras-chave</h3>
+<ul id="keywords"></ul>
+</div>
 
-  <div class="box">
-    <button onclick="book()">Agendar</button>
-    <p id="result"></p>
-  </div>
+<div class="box">
+<button onclick="book()">Agendar</button>
+<p id="result"></p>
+</div>
 
 </div>
 
 <script>
+
+const API = "https://english-professions-mvp.onrender.com";
+
 function startApp(){
   document.getElementById('landing').classList.add('hidden');
   document.getElementById('app').classList.remove('hidden');
 }
 
 function setLevel(l){
-  document.getElementById('level').innerText = 'Nível: ' + l;
+  document.getElementById('level').innerText='Nível: '+l;
 }
 
 async function loadScenarios(){
-  let prof = document.getElementById('profession').value;
-  let select = document.getElementById('scenario');
-  select.innerHTML = '';
+ let prof = document.getElementById('profession').value;
+ let select = document.getElementById('scenario');
+ select.innerHTML = '';
 
-  if(!prof) return;
+ if(!prof) return;
 
-  let res = await fetch(`/scenarios?profession=${prof}`);
-  let data = await res.json();
+ let res = await fetch(`${API}/scenarios?profession=${prof}`);
+ let data = await res.json();
 
-  data.forEach(s => {
-    let opt = document.createElement('option');
-    opt.value = s.id;
-    opt.text = s.title;
-    select.appendChild(opt);
-  });
+ data.forEach(s => {
+   let opt = document.createElement('option');
+   opt.value = s.id;
+   opt.text = s.title;
+   select.appendChild(opt);
+ });
 }
 
 async function loadScenario(){
-  let scenarioId = document.getElementById('scenario').value;
-  let kw = document.getElementById('keywords');
-  kw.innerHTML = '';
+ let scenarioId = document.getElementById('scenario').value;
+ let kw = document.getElementById('keywords');
+ kw.innerHTML = '';
 
-  if(!scenarioId) return;
+ if(!scenarioId) return;
 
-  let resScenario = await fetch(`/scenario?id=${scenarioId}`);
-  let scenario = await resScenario.json();
+ let resScenario = await fetch(`${API}/scenario?id=${scenarioId}`);
+ let scenario = await resScenario.json();
 
-  document.getElementById('context').innerText = scenario.context;
+ document.getElementById('context').innerText = scenario.context;
 
-  let res = await fetch(`/keywords?scenario=${scenarioId}`);
-  let keywords = await res.json();
+ let res = await fetch(`${API}/keywords?scenario=${scenarioId}`);
+ let keywords = await res.json();
 
-  keywords.forEach(k => {
-    let li = document.createElement('li');
-    li.innerText = k.word + ' - ' + k.pronunciation;
-    kw.appendChild(li);
-  });
+ keywords.forEach(k => {
+   let li = document.createElement('li');
+   li.innerText = k.word + ' - ' + k.pronunciation;
+   kw.appendChild(li);
+ });
 }
 
 function book(){
-  document.getElementById('result').innerText = 'Agendado (mock)';
+ document.getElementById('result').innerText='Agendado (mock)';
 }
 
 let demoIndex = 0;
@@ -191,6 +185,7 @@ function nextDemo(){
 }
 
 updateDemo();
+
 </script>
 
 </body>
