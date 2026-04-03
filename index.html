@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>English for Professions - MVP</title>
+  <style>
+    body { font-family: Arial; background:#111; color:#eee; padding:20px; }
+    select, button, input, textarea { width:100%; margin:8px 0; padding:8px; }
+    .box { border:1px solid #444; padding:12px; margin-bottom:12px; }
+    .hidden { display:none; }
+    .cta { background:#2d5; color:#111; font-weight:700; border:none; }
+  </style>
+</head>
+<body>
+
+<!-- FRONT PAGE -->
+<div id="landing">
+  <h2>Prática de Inglês para Profissões</h2>
+  <p>
+    Treine inglês com foco no seu trabalho. Escolha sua área, pratique situações reais
+    e agende uma conversa ao vivo com um instrutor que entende o seu contexto.
+  </p>
+
+  <div class="box">
+    <strong>Como funciona:</strong>
+    <ul>
+      <li>Escolha sua área (Engenharia, Aviação, Dados & Tecnologia)</li>
+      <li>Selecione uma situação real de trabalho</li>
+      <li>Veja palavras-chave com pronúncia em PT-BR</li>
+      <li>Agende uma conversa prática</li>
+    </ul>
+  </div>
+
+  <div class="box">
+    <strong>Diferencial:</strong>
+    <ul>
+      <li>Foco em situações reais (não é curso genérico)</li>
+      <li>Vocabulário técnico do seu dia a dia</li>
+      <li>Pronúncia adaptada para brasileiros</li>
+    </ul>
+  </div>
+
+    <div class="box">
+  <strong>Veja na prática:</strong>
+  <p id="demo-en"><em>We need to adjust the pipe alignment.</em></p>
+  <p id="demo-pt" class="hidden"></p>
+  <p id="demo-pron" class="hidden"></p>
+
+  <button onclick="showTranslation()">Mostrar tradução</button>
+  <button onclick="showPronunciation()">Mostrar pronúncia</button>
+  <button onclick="nextDemo()">Próxima frase</button>
+</div>
+
+  <button class="cta" onclick="startApp()">Começar</button>
+</div>
+
+<!-- APP -->
+<div id="app" class="hidden">
+
+<h2>Conversa Profissional em Inglês</h2>
+
+<div class="box">
+<label>Profissão</label>
+<select id="profession" onchange="loadScenarios()">
+<option value="">--Escolha--</option>
+<option value="eng">Engenharia</option>
+<option value="avi">Aviação</option>
+<option value="data">Dados & Tecnologia</option>
+</select>
+</div>
+
+<div class="box">
+<label>Nível</label>
+<button onclick="setLevel('Iniciante')">Iniciante</button>
+<button onclick="setLevel('Intermediário')">Intermediário</button>
+<button onclick="setLevel('Avançado')">Avançado</button>
+<p id="level"></p>
+</div>
+
+<div class="box">
+<label>Situação</label>
+<select id="scenario"></select>
+<button onclick="loadScenario()">Carregar</button>
+<p id="context"></p>
+</div>
+
+<div class="box">
+<h3>Palavras-chave</h3>
+<ul id="keywords"></ul>
+</div>
+
+<div class="box">
+<button onclick="book()">Agendar</button>
+<p id="result"></p>
+</div>
+
+</div>
+
+<script>
+function startApp(){
+  document.getElementById('landing').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+}
+
+function setLevel(l){ document.getElementById('level').innerText='Nível: '+l }
+
+// LOAD SCENARIOS FROM BACKEND
+async function loadScenarios(){
+ let prof = document.getElementById('profession').value;
+ let select = document.getElementById('scenario');
+ select.innerHTML = '';
+
+ if(!prof) return;
+
+ let res = await fetch(`http://localhost:3000/scenarios?profession=${prof}`);
+ let data = await res.json();
+
+ data.forEach(s => {
+   let opt = document.createElement('option');
+   opt.value = s.id;
+   opt.text = s.title;
+   select.appendChild(opt);
+ });
+}
+
+// LOAD SCENARIO CONTEXT + KEYWORDS
+async function loadScenario(){
+ let scenarioId = document.getElementById('scenario').value;
+ let kw = document.getElementById('keywords');
+ kw.innerHTML = '';
+
+ if(!scenarioId) return;
+
+ // load full scenario (title + description)
+ let resScenario = await fetch(`http://localhost:3000/scenario?id=${scenarioId}`);
+ let scenario = await resScenario.json();
+
+ // display full description
+ document.getElementById('context').innerText = scenario.context;
+
+ // load keywords
+ let res = await fetch(`http://localhost:3000/keywords?scenario=${scenarioId}`);
+ let keywords = await res.json();
+
+ keywords.forEach(k => {
+   let li = document.createElement('li');
+   li.innerText = k.word + ' - ' + k.pronunciation;
+   kw.appendChild(li);
+ });
+}
+
+function book(){
+ document.getElementById('result').innerText='Agendado (mock)';
+}
+// DEMO INTERACTIVE
+let demoIndex = 0;
+let demo = [
+  {
+    en: "We need to adjust the pipe alignment.",
+    pt: "Precisamos ajustar o alinhamento da tubulação.",
+    pron: "uí nídi tu adjàst dê paip aláinment"
+  },
+  {
+    en: "Can you review the data before the meeting?",
+    pt: "Você pode revisar os dados antes da reunião?",
+    pron: "kén iu rivíú dê dêita bifór dê míting"
+  },
+  {
+    en: "The system is not responding as expected.",
+    pt: "O sistema não está respondendo como esperado.",
+    pron: "dâ sistem is nát rispónding az ikspécted"
+  }
+];
+
+function updateDemo(){
+  document.getElementById('demo-en').innerText = demo[demoIndex].en;
+  document.getElementById('demo-pt').innerText = demo[demoIndex].pt;
+  document.getElementById('demo-pron').innerText = demo[demoIndex].pron;
+
+  document.getElementById('demo-pt').classList.add('hidden');
+  document.getElementById('demo-pron').classList.add('hidden');
+}
+
+function showTranslation(){
+  document.getElementById('demo-pt').classList.remove('hidden');
+}
+
+function showPronunciation(){
+  document.getElementById('demo-pron').classList.remove('hidden');
+}
+
+function nextDemo(){
+  demoIndex = (demoIndex + 1) % demo.length;
+  updateDemo();
+}
+
+// initialize demo
+updateDemo();
+</script>
+
+</body>
+</html>
