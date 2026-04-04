@@ -8,7 +8,18 @@ app.use(express.static('.'));
 // DB
 const db = new sqlite3.Database('./database.db');
 
-// TEST ENDPOINT (CHECK SAVED CUSTOM INPUT)
+// 🔧 FORCE TABLE CREATION (FIX)
+db.run(`
+  CREATE TABLE IF NOT EXISTS custom_scenarios (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    profession_code TEXT,
+    level TEXT,
+    user_text TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )
+`);
+
+// TEST ENDPOINT
 app.get('/test-custom', (req, res) => {
   db.all(
     'SELECT * FROM custom_scenarios ORDER BY id DESC LIMIT 10',
