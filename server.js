@@ -3,6 +3,7 @@ const sqlite3 = require('sqlite3').verbose();
 const app = express();
 
 app.use(express.json());
+app.use(express.static('.')); // serves index.html
 
 // DB
 const db = new sqlite3.Database('./database.db');
@@ -48,7 +49,7 @@ app.get('/keywords', (req, res) => {
   );
 });
 
-// NEW ENDPOINT (CUSTOM USER INPUT)
+// CUSTOM USER INPUT
 app.post('/scenario-custom', (req, res) => {
   const { profession, level, text } = req.body;
 
