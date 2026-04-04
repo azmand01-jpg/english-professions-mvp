@@ -4,114 +4,92 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>English for Professions - MVP</title>
-
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      background: #111;
-      color: #eee;
-    }
-
-    .wrap {
-      max-width: 980px;
-      margin: 0 auto;
-      padding: 24px;
-    }
-
-    h1, h2, h3 {
-      margin: 0 0 12px 0;
-      font-weight: 600;
-    }
-
-    .card {
-      background: #1b1b1b;
-      border: 1px solid #333;
-      border-radius: 10px;
-      padding: 16px;
-      margin-bottom: 18px;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: 600;
-    }
-
-    select, textarea, button {
-      width: 100%;
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid #444;
-      background: #222;
-      color: #eee;
-      font-size: 15px;
-      margin-bottom: 12px;
-    }
-
-    textarea {
-      min-height: 90px;
-    }
-
-    button {
-      cursor: pointer;
-      font-weight: 700;
-      background: #2d5;
-      color: #111;
-      border: none;
-    }
-
-    .result {
-      padding: 10px;
-      border-radius: 8px;
-      margin-top: 8px;
-      background: #202820;
-      border: 1px solid #3f6;
-    }
+    body { font-family: Arial; background:#111; color:#eee; padding:20px; }
+    select, button, input, textarea { width:100%; margin:8px 0; padding:8px; }
+    .box { border:1px solid #444; padding:12px; margin-bottom:12px; }
+    .hidden { display:none; }
+    .cta { background:#2d5; color:#111; font-weight:700; border:none; }
   </style>
 </head>
-
 <body>
 
-<div class="wrap">
+<div id="landing">
+  <h2>Prática de Inglês para Profissões</h2>
+  <p>
+    Treine inglês com foco no seu trabalho. Escolha sua área, pratique situações reais
+    e agende uma conversa ao vivo com um instrutor que entende o seu contexto.
+  </p>
 
-<h1>Conversa Profissional em Inglês</h1>
+  <div class="box">
+    <strong>Como funciona:</strong>
+    <ul>
+      <li>Escolha sua área</li>
+      <li>Selecione uma situação</li>
+      <li>Veja palavras-chave</li>
+      <li>Agende uma conversa</li>
+    </ul>
+  </div>
 
-<div class="card">
-  <label>Profissão</label>
-  <select id="profession" onchange="loadScenarios()">
-    <option value="">-- Escolha --</option>
-    <option value="eng">Engenharia</option>
-    <option value="avi">Aviação</option>
-    <option value="data">Dados & Tecnologia</option>
-  </select>
+  <div class="box">
+    <strong>Veja na prática:</strong>
+    <p id="demo-en"><em>We need to adjust the pipe alignment.</em></p>
+    <p id="demo-pt" class="hidden"></p>
+    <p id="demo-pron" class="hidden"></p>
+
+    <button onclick="showTranslation()">Mostrar tradução</button>
+    <button onclick="showPronunciation()">Mostrar pronúncia</button>
+    <button onclick="nextDemo()">Próxima frase</button>
+  </div>
+
+  <button class="cta" onclick="startApp()">Começar</button>
 </div>
 
-<div class="card">
-  <label>Nível</label>
-  <button onclick="setLevel('Iniciante')">Iniciante</button>
-  <button onclick="setLevel('Intermediário')">Intermediário</button>
-  <button onclick="setLevel('Avançado')">Avançado</button>
-  <p id="level"></p>
+<div id="app" class="hidden">
+
+<h2>Conversa Profissional em Inglês</h2>
+
+<div class="box">
+<label>Profissão</label>
+<select id="profession" onchange="loadScenarios()">
+<option value="">--Escolha--</option>
+<option value="eng">Engenharia</option>
+<option value="avi">Aviação</option>
+<option value="data">Dados & Tecnologia</option>
+</select>
 </div>
 
-<div class="card">
-  <label>Situação</label>
-  <select id="scenario"></select>
-  <button onclick="loadScenario()">Carregar</button>
-  <p id="context"></p>
+<div class="box">
+<label>Nível</label>
+<button onclick="setLevel('Iniciante')">Iniciante</button>
+<button onclick="setLevel('Intermediário')">Intermediário</button>
+<button onclick="setLevel('Avançado')">Avançado</button>
+<p id="level"></p>
 </div>
 
-<div class="card">
+<div class="box">
+<label>Situação</label>
+<select id="scenario"></select>
+<button onclick="loadScenario()">Carregar</button>
+<p id="context"></p>
+</div>
+
+<!-- NEW BLOCK -->
+<div class="box">
   <label>Ou descreva sua situação</label>
-  <textarea id="customText"></textarea>
+  <textarea id="customText" placeholder="Descreva uma situação do seu trabalho"></textarea>
   <button onclick="sendCustom()">Enviar</button>
-  <div id="customResult" class="result"></div>
+  <p id="customResult"></p>
 </div>
 
-<div class="card">
-  <h3>Palavras-chave</h3>
-  <ul id="keywords"></ul>
+<div class="box">
+<h3>Palavras-chave</h3>
+<ul id="keywords"></ul>
+</div>
+
+<div class="box">
+<button onclick="book()">Agendar</button>
+<p id="result"></p>
 </div>
 
 </div>
@@ -119,6 +97,11 @@
 <script>
 
 const API = "https://english-professions-mvp.onrender.com";
+
+function startApp(){
+  document.getElementById('landing').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+}
 
 function setLevel(l){
   document.getElementById('level').innerText='Nível: '+l;
@@ -189,6 +172,53 @@ async function sendCustom(){
     document.getElementById('customResult').innerText = "Erro";
   }
 }
+
+function book(){
+ document.getElementById('result').innerText='Agendado (mock)';
+}
+
+let demoIndex = 0;
+let demo = [
+  {
+    en: "We need to adjust the pipe alignment.",
+    pt: "Precisamos ajustar o alinhamento da tubulação.",
+    pron: "uí nídi tu adjàst dê paip aláinment"
+  },
+  {
+    en: "Can you review the data before the meeting?",
+    pt: "Você pode revisar os dados antes da reunião?",
+    pron: "kén iu rivíú dê dêita bifór dê míting"
+  },
+  {
+    en: "The system is not responding as expected.",
+    pt: "O sistema não está respondendo como esperado.",
+    pron: "dâ sistem is nát rispónding az ikspécted"
+  }
+];
+
+function updateDemo(){
+  document.getElementById('demo-en').innerText = demo[demoIndex].en;
+  document.getElementById('demo-pt').innerText = demo[demoIndex].pt;
+  document.getElementById('demo-pron').innerText = demo[demoIndex].pron;
+
+  document.getElementById('demo-pt').classList.add('hidden');
+  document.getElementById('demo-pron').classList.add('hidden');
+}
+
+function showTranslation(){
+  document.getElementById('demo-pt').classList.remove('hidden');
+}
+
+function showPronunciation(){
+  document.getElementById('demo-pron').classList.remove('hidden');
+}
+
+function nextDemo(){
+  demoIndex = (demoIndex + 1) % demo.length;
+  updateDemo();
+}
+
+updateDemo();
 
 </script>
 
