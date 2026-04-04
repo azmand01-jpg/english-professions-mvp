@@ -1,78 +1,75 @@
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
-const cors = require('cors');
-const path = require('path');
-
 const app = express();
-app.use(cors());
-app.use(express.static(__dirname));
 
-const db = new sqlite3.Database('./database.db', (err) => {
-  if (err) {
-    console.error(err.message);
-  } else {
-    console.log('Database connected');
-  }
-});
+app.use(express.json());
 
-// Home page
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
-});
+// DB
+const db = new sqlite3.Database('./database.db');
 
-// Get scenarios by profession
+// ROUTES
+
 app.get('/scenarios', (req, res) => {
-  const code = req.query.profession;
+  const profession = req.query.profession;
 
   db.all(
-    "SELECT * FROM scenarios WHERE profession_code = ?",
-    [code],
+    'SELECT id, title FROM scenarios WHERE profession_code = ?',
+    [profession],
     (err, rows) => {
-      if (err) {
-        res.status(500).json({ error: err.message });
-        return;
-      }
+      if (err) return res.status(500).json({ error: err.message });
       res.json(rows);
     }
   );
 });
 
-// Get single scenario
 app.get('/scenario', (req, res) => {
   const id = req.query.id;
 
   db.get(
-    "SELECT * FROM scenarios WHERE id = ?",
+    'SELECT context FROM scenarios WHERE id = ?',
     [id],
     (err, row) => {
-      if (err) {
-        res.status(500).json({ error: err.message });
-        return;
-      }
+      if (err) return res.status(500).json({ error: err.message });
       res.json(row);
     }
   );
 });
 
-// Get keywords for scenario
 app.get('/keywords', (req, res) => {
   const scenarioId = req.query.scenario;
 
   db.all(
-    "SELECT word, pronunciation FROM keywords WHERE scenario_id = ?",
+    'SELECT word, pronunciation FROM keywords WHERE scenario_id = ?',
     [scenarioId],
     (err, rows) => {
-      if (err) {
-        res.status(500).json({ error: err.message });
-        return;
-      }
+      if (err) return res.status(500).json({ error: err.message });
       res.json(rows);
     }
   );
 });
 
-const PORT = process.env.PORT || 3000;
+// NEW ENDPOINT (CUSTOM USER INPUT)
+app.post('/scenario-custom', (req, res) => {
+  const { profession, level, text } = req.body;
 
+  if (!text) {
+    return res.status(400).json({ error: 'Missing text' });
+  }
+
+  const sql = `
+    INSERT INTO custom_scenarios (profession_code, level, user_text)
+    VALUES (?, ?, ?)
+  `;
+
+  db.run(sql, [profession, level, text], function(err) {
+    if (err) return res.status(500).json({ error: err.message });
+
+    res.json({ success: true, id: this.lastID });
+  });
+});
+
+// START SERVER
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
