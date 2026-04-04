@@ -3,10 +3,22 @@ const sqlite3 = require('sqlite3').verbose();
 const app = express();
 
 app.use(express.json());
-app.use(express.static('.')); // serves index.html
+app.use(express.static('.'));
 
 // DB
 const db = new sqlite3.Database('./database.db');
+
+// TEST ENDPOINT (CHECK SAVED CUSTOM INPUT)
+app.get('/test-custom', (req, res) => {
+  db.all(
+    'SELECT * FROM custom_scenarios ORDER BY id DESC LIMIT 10',
+    [],
+    (err, rows) => {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json(rows);
+    }
+  );
+});
 
 // ROUTES
 
